@@ -15,6 +15,8 @@ class Expression {
         virtual Expression* simplify() = 0;
         virtual std::string toString() const = 0;
 
+        virtual Expression* clone() = 0;
+
         virtual bool isConstant() const;
 
         virtual ~Expression() {};
@@ -29,6 +31,8 @@ class Constant: public Expression {
         Expression* simplify() override;
         std::string toString() const override;
 
+        Expression* clone() override;
+
         bool isConstant() const override;
 
     private:
@@ -40,6 +44,8 @@ class E : public Constant {
         E();
 
         std::string toString() const override; 
+
+        Expression* clone() override;
 };
 
 class Variable : public Expression {
@@ -50,6 +56,8 @@ class Variable : public Expression {
         Expression* derivative(Variable* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
+
+        Expression* clone() override;
 
     private:
         char variable;
@@ -62,6 +70,8 @@ class Differentiation : public Expression {
         Expression* derivative(Variable* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
+
+        Expression* clone() override;
 
         ~Differentiation() override;
 
@@ -91,6 +101,8 @@ class Power : public BinaryOperator {
         Expression* derivative(Variable* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
+
+        Expression* clone() override;
 };
 
 class Log : public BinaryOperator {
@@ -100,6 +112,8 @@ class Log : public BinaryOperator {
         Expression* derivative(Variable* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
+
+        Expression* clone() override;
 };
 
 class Sum : public BinaryOperator {
@@ -109,6 +123,8 @@ class Sum : public BinaryOperator {
         Expression* derivative(Variable* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
+
+        Expression* clone() override;
 };
 
 class Difference : public BinaryOperator {
@@ -118,6 +134,8 @@ class Difference : public BinaryOperator {
         Expression* derivative(Variable* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
+
+        Expression* clone() override;
 };
 
 class Product : public BinaryOperator {
@@ -127,6 +145,8 @@ class Product : public BinaryOperator {
         Expression* derivative(Variable* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
+
+        Expression* clone() override;
 };
 
 class Quotient : public BinaryOperator {
@@ -136,9 +156,13 @@ class Quotient : public BinaryOperator {
         Expression* derivative(Variable* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
+
+        Expression* clone() override;
 };
 
 } // ast
 } // dfaxm
+
+std::ostream& operator <<(std::ostream& out, const dfxam::ast::Expression* expr);
 
 #endif
