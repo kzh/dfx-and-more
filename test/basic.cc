@@ -1,10 +1,12 @@
 #include "dfxam.h"
 
-void testDerivative() {
-    auto five = new dfxam::ast::Constant(5);
-    auto x = new dfxam::ast::Variable('x');
+using namespace dfxam::ast;
 
-    auto expr = new dfxam::ast::Power(x, five);
+void testDerivative() {
+    auto e = new E();
+    auto x = new Variable('x');
+
+    auto expr = new Power(e, x);
     std::cout << "Expression: " << expr << std::endl;
 
     auto derivative = expr->derivative(x);
@@ -15,10 +17,10 @@ void testDerivative() {
 }
 
 void testSimplification() {
-    auto x = new dfxam::ast::Variable('x');
-    auto zero = new dfxam::ast::Constant(0);
+    auto x = new Variable('x');
+    auto zero = new Constant(0);
 
-    auto expr = new dfxam::ast::Sum(x, zero);
+    auto expr = new Sum(x, zero);
     std::cout << "Expression: " << expr << std::endl;
 
     auto simplified = expr->simplify();
