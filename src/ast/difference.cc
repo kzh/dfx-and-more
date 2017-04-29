@@ -17,21 +17,15 @@ Expression* Difference::simplify() {
     auto right = getRight()->simplify();
 
     // 0 - x = -1 * x
-    if (left->isConstant()) {
-        Constant* c = static_cast<Constant*>(left);
-        
-        if (c->getValue() == 0) {
-            return new Product(new Constant(-1), right);
-        }
+    if (Constant::isConstantValue(left, 0)) {
+        delete left;
+        return new Product(new Constant(-1), right);
     }
 
     // x - 0 = x
-    if (right->isConstant()) {
-        Constant* c = static_cast<Constant*>(right);
-
-        if (c->getValue() == 0) {
-            return left;
-        }
+    if (Constant::isConstantValue(right, 0)) {
+        delete right;
+        return left;
     }
 
     return new Difference(left, right);

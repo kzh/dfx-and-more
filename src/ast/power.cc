@@ -21,11 +21,16 @@ Expression* Power::simplify() {
 
     if (Log* l = dynamic_cast<Log*>(right)) {
         if (left->equals(l->getLeft())) {
-            return l->getRight()->clone();
+            auto ret = l->getRight()->clone();
+
+            delete left;
+            delete right;
+
+            return ret;
         }
     }
 
-    return new Power(getLeft()->simplify(), getRight()->simplify());
+    return new Power(left, right);
 }
 
 std::string Power::toString() const {

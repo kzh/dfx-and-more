@@ -19,8 +19,16 @@ Expression* Quotient::derivative(Variable* respect) {
 //TODO
 Expression* Quotient::simplify() {
 //    std::cout << "Simplifying: " << this << std::endl;
+    auto left = getLeft()->simplify();
+    auto right = getRight()->simplify();
 
-    return new Quotient(getLeft()->simplify(), getRight()->simplify());
+    if (Constant::isConstantValue(left, 0)) {
+        delete left;
+        delete right;
+        return new Constant(0);
+    }
+
+    return new Quotient(left, right);
 }
 
 std::string Quotient::toString() const {

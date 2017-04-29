@@ -20,30 +20,20 @@ Expression* Product::simplify() {
     Expression* left = getLeft()->simplify();
     Expression* right = getRight()->simplify();
 
-    Constant* lConstant = nullptr;
-    Constant* rConstant = nullptr;
-
     // multiplicative property of zero
-    if (left->isConstant()) {
-        lConstant = static_cast<Constant*>(left);
-
-        if (lConstant->getValue() == 0) {
+    if (Constant::isConstantValue(left, 0) ||
+        Constant::isConstantValue(right, 0)) {
+            delete left;
+            delete right;
             return new Constant(0); 
-        }
-    }
-
-    if (right->isConstant()) {
-        rConstant = static_cast<Constant*>(right);
-
-        if (rConstant->getValue() == 0) {
-            return new Constant(0);
-        }
     }
 
     // multiplicative identity property
-    if (left->isConstant() && lConstant->getValue() == 1) {
+    if (Constant::isConstantValue(left, 1)) {
+        delete left;
         return right;
-    } else if (right->isConstant() && rConstant->getValue() == 1) {
+    } else if (Constant::isConstantValue(right, 1)) {
+        delete right;
         return left;
     }
 

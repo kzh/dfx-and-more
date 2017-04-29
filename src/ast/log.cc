@@ -22,10 +22,12 @@ Expression* Log::simplify() {
 
     // log_x(x) =  1
     if (left->equals(right)) {
+        delete left;
+        delete right;
         return new Constant(1);
     }
 
-    return new Log(getLeft()->clone(), getRight()->clone());
+    return new Log(left, right);
 }
 
 std::string Log::toString() const {

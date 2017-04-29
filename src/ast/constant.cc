@@ -45,6 +45,15 @@ bool Constant::isConstant() const {
     return true;
 }
 
+bool Constant::isConstantValue(Expression* expr, int val) {
+    if (!expr->isConstant()) {
+        return false;
+    }
+
+    Constant* c = static_cast<Constant*>(expr);
+    return c->getValue() == val;
+}
+
 E::E() 
     : Constant(exp(1)) {}
 

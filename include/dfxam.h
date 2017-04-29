@@ -36,6 +36,7 @@ class Constant: public Expression {
         Expression* clone() override;
 
         bool isConstant() const override;
+        static bool isConstantValue(Expression* expr, int val);
 
     private:
         double value;

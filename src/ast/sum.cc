@@ -18,22 +18,15 @@ Expression* Sum::simplify() {
 
     /* additive identity property */
 
-    if (left->isConstant()) {
-        Constant* lConstant = static_cast<Constant*>(left);
-
-        if (lConstant->getValue() == 0) {
-            return right; 
-        }
+    if (Constant::isConstantValue(left, 0)) {
+        delete left;
+        return right; 
     }
 
-    if (right->isConstant()) {
-        Constant* rConstant = static_cast<Constant*>(right);
-
-        if (rConstant->getValue() == 0) {
-            return left;
-        }
+    if (Constant::isConstantValue(right, 0)) {
+        delete right;
+        return left;
     }
-
 
     return new Sum(left, right);
 }
