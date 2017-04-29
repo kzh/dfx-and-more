@@ -30,6 +30,27 @@ std::string Quotient::toString() const {
     return s.str();
 }
 
+bool Quotient::equals(Expression* expr) {
+    Quotient* q = nullptr;
+    if (!(q = dynamic_cast<Quotient*>(expr))) {
+        return false;
+    }
+
+    auto thisL = getLeft()->simplify();
+    auto thisR = getRight()->simplify();
+    auto exprL = q->getLeft()->simplify();
+    auto exprR = q->getRight()->simplify();
+
+    bool equality = thisL->equals(exprL) && thisR->equals(exprR);
+
+    delete thisL;
+    delete thisR;
+    delete exprL;
+    delete exprR;
+
+    return equality;
+}
+
 Expression* Quotient::clone() {
     return new Quotient(getLeft()->clone(), getRight()->clone());
 }

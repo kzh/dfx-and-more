@@ -15,6 +15,7 @@ class Expression {
         virtual Expression* simplify() = 0;
         virtual std::string toString() const = 0;
 
+        virtual bool equals(Expression* expr) = 0;
         virtual Expression* clone() = 0;
 
         virtual bool isConstant() const;
@@ -31,6 +32,7 @@ class Constant: public Expression {
         Expression* simplify() override;
         std::string toString() const override;
 
+        bool equals(Expression* expr) override;
         Expression* clone() override;
 
         bool isConstant() const override;
@@ -57,6 +59,7 @@ class Variable : public Expression {
         Expression* simplify() override;
         std::string toString() const override;
 
+        bool equals(Expression* expr) override;
         Expression* clone() override;
 
     private:
@@ -66,11 +69,14 @@ class Variable : public Expression {
 class Differentiation : public Expression {
     public:
         Differentiation(Expression* expr, Variable* respect);
+        Expression* getExpression() const;
+        Variable* getRespect() const;
 
         Expression* derivative(Variable* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
 
+        bool equals(Expression* expr) override;
         Expression* clone() override;
 
         ~Differentiation() override;
@@ -102,6 +108,7 @@ class Power : public BinaryOperator {
         Expression* simplify() override;
         std::string toString() const override;
 
+        bool equals(Expression* expr) override;
         Expression* clone() override;
 };
 
@@ -113,6 +120,7 @@ class Log : public BinaryOperator {
         Expression* simplify() override;
         std::string toString() const override;
 
+        bool equals(Expression* expr) override;
         Expression* clone() override;
 };
 
@@ -124,6 +132,7 @@ class Sum : public BinaryOperator {
         Expression* simplify() override;
         std::string toString() const override;
 
+        bool equals(Expression* expr) override;
         Expression* clone() override;
 };
 
@@ -135,6 +144,7 @@ class Difference : public BinaryOperator {
         Expression* simplify() override;
         std::string toString() const override;
 
+        bool equals(Expression* expr) override;
         Expression* clone() override;
 };
 
@@ -146,6 +156,7 @@ class Product : public BinaryOperator {
         Expression* simplify() override;
         std::string toString() const override;
 
+        bool equals(Expression* expr) override;
         Expression* clone() override;
 };
 
@@ -157,6 +168,7 @@ class Quotient : public BinaryOperator {
         Expression* simplify() override;
         std::string toString() const override;
 
+        bool equals(Expression* expr) override;
         Expression* clone() override;
 };
 

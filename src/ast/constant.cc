@@ -28,6 +28,15 @@ std::string Constant::toString() const {
     return s.str();
 }
 
+bool Constant::equals(Expression* expr) {
+    if (!expr->isConstant()) {
+        return false;
+    }
+
+    Constant* c = static_cast<Constant*>(expr);
+    return c->getValue() == getValue();
+}
+
 Expression* Constant::clone() {
     return new Constant(getValue());
 }

@@ -30,6 +30,15 @@ std::string Variable::toString() const {
     return s.str();
 }
 
+bool Variable::equals(Expression* expr) {
+    Variable* v = nullptr;
+    if (!(v = dynamic_cast<Variable*>(expr))) {
+        return false;
+    }
+
+    return v->getVariable() == getVariable(); 
+}
+
 Expression* Variable::clone() {
     return new Variable(getVariable());
 }

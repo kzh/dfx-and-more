@@ -3,10 +3,19 @@
 using namespace dfxam::ast;
 
 void testDerivative() {
-    auto e = new E();
-    auto x = new Variable('x');
+    auto e = new E();                                // e
 
-    auto expr = new Power(e, x);
+    auto two = new Constant(2);                      // 2
+    auto x = new Variable('x');                      // x
+    auto twox = new Product(two, x);                 // 2x
+
+    auto etotwox = new Power(e, twox);               // e ^ (2x)
+
+    auto five = new Constant(5);                     // 5
+    auto fiveoverx = new Quotient(five, x->clone()); // 5 / x
+
+    auto expr = new Sum(etotwox, fiveoverx);         // e ^ (2x) + (5/x)
+
     std::cout << "Expression: " << expr << std::endl;
 
     auto derivative = expr->derivative(x);
@@ -24,7 +33,7 @@ void testSimplification() {
     std::cout << "Expression: " << expr << std::endl;
 
     auto simplified = expr->simplify();
-    std::cout << "Simplified Derivative: " << simplified << std::endl;
+    std::cout << "Simplified: " << simplified << std::endl;
 }
 
 int main() {

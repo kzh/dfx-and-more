@@ -52,9 +52,31 @@ Expression* Product::simplify() {
 
 std::string Product::toString() const {
     std::stringstream s;
+
     s << "(" << getLeft()->toString() << ") * (" << getRight()->toString() << ")";
 
     return s.str();
+}
+
+bool Product::equals(Expression* expr) {
+    Product* p = nullptr;
+    if (!(p = dynamic_cast<Product*>(expr))) {
+        return false;
+    }
+
+    auto thisL = getLeft()->simplify();
+    auto thisR = getRight()->simplify();
+    auto exprL = p->getLeft()->simplify();
+    auto exprR = p->getRight()->simplify();
+
+    bool equality = thisL->equals(exprL) && thisR->equals(exprR);
+
+    delete thisL;
+    delete thisR;
+    delete exprL;
+    delete exprR;
+
+    return equality;
 }
 
 Expression* Product::clone() {

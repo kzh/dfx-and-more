@@ -13,8 +13,28 @@ Expression* Difference::derivative(Variable* respect) {
 //TODO
 Expression* Difference::simplify() {
 //    std::cout << "Simplifying: " << this << std::endl;
+    auto left = getLeft()->simplify();
+    auto right = getRight()->simplify();
 
-    return new Difference(getLeft()->simplify(), getRight()->simplify());
+    // 0 - x = -1 * x
+    if (left->isConstant()) {
+        Constant* c = static_cast<Constant*>(left);
+        
+        if (c->getValue() == 0) {
+            return new Product(new Constant(-1), right);
+        }
+    }
+
+    // x - 0 = x
+    if (right->isConstant()) {
+        Constant* c = static_cast<Constant*>(right);
+
+        if (c->getValue() == 0) {
+            return left;
+        }
+    }
+
+    return new Difference(left, right);
 }
 
 std::string Difference::toString() const {
@@ -22,6 +42,27 @@ std::string Difference::toString() const {
     s << "(" << getLeft()->toString() << ") - (" << getRight()->toString() << ")";
 
     return s.str();
+}
+
+bool Difference::equals(Expression* expr) {
+    Difference* d = nullptr;
+    if (!(d = dynamic_cast<Difference*>(expr))) {
+        return false;
+    }
+
+    auto thisL = getLeft()->simplify();
+    auto thisR = getRight()->simplify();
+    auto exprL = d->getLeft()->simplify();
+    auto exprR = d->getRight()->simplify();
+
+    bool equality = thisL->equals(exprL) && thisR->equals(exprR);
+
+    delete thisL;
+    delete thisR;
+    delete exprL;
+    delete exprR;
+
+    return equality;
 }
 
 Expression* Difference::clone() {

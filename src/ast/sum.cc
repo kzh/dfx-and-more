@@ -45,6 +45,27 @@ std::string Sum::toString() const {
     return s.str();
 }
 
+bool Sum::equals(Expression* expr) {
+    Sum* s = nullptr;
+    if (!(s = dynamic_cast<Sum*>(expr))) {
+        return false;
+    }
+
+    auto thisL = getLeft()->simplify();
+    auto thisR = getRight()->simplify();
+    auto exprL = s->getLeft()->simplify();
+    auto exprR = s->getRight()->simplify();
+
+    bool equality = thisL->equals(exprL) && thisR->equals(exprR);
+
+    delete thisL;
+    delete thisR;
+    delete exprL;
+    delete exprR;
+
+    return equality;
+}
+
 Expression* Sum::clone() {
     return new Sum(getLeft()->clone(), getRight()->clone());
 }

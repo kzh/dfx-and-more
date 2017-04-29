@@ -20,6 +20,11 @@ Expression* Log::simplify() {
     auto left = getLeft()->simplify();
     auto right = getRight()->simplify();
 
+    // log_x(x) =  1
+    if (left->equals(right)) {
+        return new Constant(1);
+    }
+
     return new Log(getLeft()->clone(), getRight()->clone());
 }
 
@@ -29,6 +34,27 @@ std::string Log::toString() const {
     s << "log_(" << getLeft()->toString() << ")(" << getRight()->toString() << ")"; 
 
     return s.str();
+}
+
+bool Log::equals(Expression* expr) {
+    Log* l = nullptr;
+    if (!(l = dynamic_cast<Log*>(expr))) {
+        return false;
+    }
+
+    auto thisL = getLeft()->simplify();
+    auto thisR = getRight()->simplify();
+    auto exprL = l->getLeft()->simplify();
+    auto exprR = l->getRight()->simplify();
+
+    bool equality = thisL->equals(exprL) && thisR->equals(exprR);
+
+    delete thisL;
+    delete thisR;
+    delete exprL;
+    delete exprR;
+
+    return equality;
 }
 
 Expression* Log::clone() {
