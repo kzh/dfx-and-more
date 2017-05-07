@@ -2,10 +2,10 @@
 
 using namespace dfxam::ast;
 
-Variable::Variable(char v)
+Variable::Variable(std::string v)
     : variable(v) {}
 
-char Variable::getVariable() const {
+std::string Variable::getVariable() const {
     return variable;
 }
 

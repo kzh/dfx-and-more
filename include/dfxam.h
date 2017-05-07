@@ -4,6 +4,8 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <unordered_map>
+#include <vector>
 
 namespace dfxam {
 namespace ast {
@@ -28,7 +30,7 @@ class Constant: public Expression {
         Constant(double val);
         double getValue() const;
 
-        Expression* derivative(Variable* respect) override;
+        Expression* derivative(Variable* respect) override; 
         Expression* simplify() override;
         std::string toString() const override;
 
@@ -53,8 +55,8 @@ class E : public Constant {
 
 class Variable : public Expression {
     public:
-        Variable(char v);
-        char getVariable() const;
+        Variable(std::string v);
+        std::string getVariable() const;
 
         Expression* derivative(Variable* respect) override;
         Expression* simplify() override;
@@ -64,7 +66,7 @@ class Variable : public Expression {
         Expression* clone() override;
 
     private:
-        char variable;
+        std::string variable;
 };
 
 class Differentiation : public Expression {
@@ -174,6 +176,78 @@ class Quotient : public BinaryOperator {
 };
 
 } // ast
+
+namespace repl {
+
+enum class TokenType { IDENTIFIER, NUMBER, OPERATOR, SEPARATOR };
+
+class Token {
+    public:
+        Token(TokenType type, std::string contents);
+        bool match(TokenType type, std::string contents);
+
+        std::string getContents() const;
+        TokenType getType() const;
+
+    private:
+        TokenType type;
+        std::string contents;
+};
+
+class Lexer {
+    public:
+        Lexer(std::string s);
+
+        std::vector<Token> lex();
+        static bool isOperator(char c);
+        static bool isSeparator(char c);
+        static bool isLetter(char c);
+        static bool isNumber(char c);
+
+    private:
+        char& peek();
+        void consume();
+
+        void lexIdentifier();
+        void lexNumber();
+        void lexSeparator();
+        void lexOperator();
+
+        std::string s;
+        int index;
+        std::vector<Token> tokens;
+};
+
+class Parser {
+    public:
+
+    private:
+};
+
+class Function {
+    public:
+        Function(std::string name, std::vector<char> inputs, ast::Expression* expr);
+        std::string getName() const;
+
+    private:
+        std::string name;
+        std::vector<char> inputs;
+        ast::Expression* expr;
+};
+
+class ExecutionEngine {
+    public:
+        void registerFunction(Function* f);
+        Function* retrieveFunction(std::string name);
+        void deregisterFunction(std::string name);
+
+        void operator <<(std::string& expr);
+
+    private:
+        std::unordered_map<std::string, Function*> functions;
+};
+
+} // repl
 } // dfaxm
 
 std::ostream& operator <<(std::ostream& out, const dfxam::ast::Expression* expr);
