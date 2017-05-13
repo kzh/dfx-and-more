@@ -6,7 +6,7 @@ Product::Product(Expression* left, Expression* right)
     : BinaryOperator(left, right) {}
 
 // (f(x) * g(x))' = f'(x)g(x) + f(x)g'(x)
-Expression* Product::derivative(Variable* respect) {
+Expression* Product::derivative(Function* respect) {
     auto left = new Product(getLeft()->derivative(respect), getRight()->clone());
     auto right = new Product(getLeft()->clone(), getRight()->derivative(respect));
 

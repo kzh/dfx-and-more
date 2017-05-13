@@ -2,18 +2,18 @@
 
 using namespace dfxam::ast;
 
-Differentiation::Differentiation(Expression* expr, Variable* respect)
+Differentiation::Differentiation(Expression* expr, Function* respect)
     : expr(expr), respect(respect) {}
 
 Expression* Differentiation::getExpression() const {
     return expr;
 }
 
-Variable* Differentiation::getRespect() const {
+Function* Differentiation::getRespect() const {
     return respect;
 }
 
-Expression* Differentiation::derivative(Variable* respect) {
+Expression* Differentiation::derivative(Function* respect) {
     return new Differentiation(this, respect);
 }
 
@@ -30,7 +30,7 @@ std::string Differentiation::toString() const {
 
 Expression* Differentiation::clone() {
     return new Differentiation(expr->clone(), 
-                               new Variable(respect->getVariable()));
+                               new Function(respect->getName()));
 }
 
 bool Differentiation::equals(Expression* expr) {
@@ -42,7 +42,7 @@ bool Differentiation::equals(Expression* expr) {
     auto thisExpr = getExpression()->simplify();
     auto otherExpr = d->getExpression()->simplify(); 
 
-    bool equality = thisExpr->equals(otherExpr) && getRespect()->getVariable() == d->getRespect()->getVariable();
+    bool equality = thisExpr->equals(otherExpr) && getRespect()->getName() == d->getRespect()->getName();
 
     delete thisExpr;
     delete otherExpr;

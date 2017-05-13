@@ -6,7 +6,7 @@ Quotient::Quotient(Expression* left, Expression* right)
     : BinaryOperator(left, right) {}
 
 // (f(x) / g(x))' = (f'(x)g(x) - f(x)g'(x)) / (g(x) ^ 2)
-Expression* Quotient::derivative(Variable* respect) {
+Expression* Quotient::derivative(Function* respect) {
     auto left = new Product(getLeft()->derivative(respect), getRight()->clone());
     auto right = new Product(getLeft()->clone(), getRight()->derivative(respect));
 

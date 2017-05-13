@@ -6,7 +6,7 @@ Difference::Difference(Expression* left, Expression* right)
     : BinaryOperator(left, right) {}
 
 // (f(x) - g(x))' = f'(x) - g'(x)
-Expression* Difference::derivative(Variable* respect) {
+Expression* Difference::derivative(Function* respect) {
     return new Difference(getLeft()->derivative(respect), getRight()->derivative(respect));
 }
 

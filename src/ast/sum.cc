@@ -6,7 +6,7 @@ Sum::Sum(Expression* left, Expression* right)
     : BinaryOperator(left, right) {}
 
 // (f(x) + g(x))'  = f'(x) + g'(x)
-Expression* Sum::derivative(Variable* respect) {
+Expression* Sum::derivative(Function* respect) {
     return new Sum(getLeft()->derivative(respect), getRight()->derivative(respect));
 }
 

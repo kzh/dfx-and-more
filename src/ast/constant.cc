@@ -11,7 +11,7 @@ double Constant::getValue() const {
     return value;
 }
 
-Expression* Constant::derivative(Variable* respect) {
+Expression* Constant::derivative(Function* respect) {
     return new Constant(0);
 }
 

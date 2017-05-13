@@ -10,10 +10,10 @@
 namespace dfxam {
 namespace ast {
 
-class Variable;
+class Function;
 class Expression {
     public:
-        virtual Expression* derivative(Variable* respect) = 0;
+        virtual Expression* derivative(Function* respect) = 0;
         virtual Expression* simplify() = 0;
         virtual std::string toString() const = 0;
 
@@ -30,7 +30,7 @@ class Constant: public Expression {
         Constant(double val);
         double getValue() const;
 
-        Expression* derivative(Variable* respect) override; 
+        Expression* derivative(Function* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
 
@@ -48,17 +48,17 @@ class E : public Constant {
     public:
         E();
 
-        std::string toString() const override; 
+        std::string toString() const override;
 
         Expression* clone() override;
 };
 
-class Variable : public Expression {
+class Function : public Expression {
     public:
-        Variable(std::string v);
-        std::string getVariable() const;
+        Function(std::string v);
+        std::string getName() const;
 
-        Expression* derivative(Variable* respect) override;
+        Expression* derivative(Function* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
 
@@ -66,16 +66,16 @@ class Variable : public Expression {
         Expression* clone() override;
 
     private:
-        std::string variable;
+        std::string name;
 };
 
 class Differentiation : public Expression {
     public:
-        Differentiation(Expression* expr, Variable* respect);
+        Differentiation(Expression* expr, Function* respect);
         Expression* getExpression() const;
-        Variable* getRespect() const;
+        Function* getRespect() const;
 
-        Expression* derivative(Variable* respect) override;
+        Expression* derivative(Function* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
 
@@ -86,12 +86,16 @@ class Differentiation : public Expression {
 
     private:
         Expression* expr;
-        Variable* respect;
+        Function* respect;
 };
 
 class BinaryOperator : public Expression {
     public:
+        BinaryOperator();
         BinaryOperator(Expression* left, Expression* right);
+
+        void setLeft(Expression* l);
+        void setRight(Expression* r);
 
         Expression* getLeft() const;
         Expression* getRight() const;
@@ -107,7 +111,7 @@ class Power : public BinaryOperator {
     public:
         Power(Expression* left, Expression* right);
 
-        Expression* derivative(Variable* respect) override;
+        Expression* derivative(Function* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
 
@@ -119,7 +123,7 @@ class Log : public BinaryOperator {
     public:
         Log(Expression* left, Expression* right);
 
-        Expression* derivative(Variable* respect) override;
+        Expression* derivative(Function* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
 
@@ -131,7 +135,7 @@ class Sum : public BinaryOperator {
     public:
         Sum(Expression* left, Expression* right);
 
-        Expression* derivative(Variable* respect) override;
+        Expression* derivative(Function* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
 
@@ -143,7 +147,7 @@ class Difference : public BinaryOperator {
     public:
         Difference(Expression* left, Expression* right);
 
-        Expression* derivative(Variable* respect) override;
+        Expression* derivative(Function* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
 
@@ -155,7 +159,7 @@ class Product : public BinaryOperator {
     public:
         Product(Expression* left, Expression* right);
 
-        Expression* derivative(Variable* respect) override;
+        Expression* derivative(Function* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
 
@@ -167,7 +171,7 @@ class Quotient : public BinaryOperator {
     public:
         Quotient(Expression* left, Expression* right);
 
-        Expression* derivative(Variable* respect) override;
+        Expression* derivative(Function* respect) override;
         Expression* simplify() override;
         std::string toString() const override;
 
@@ -220,13 +224,23 @@ class Lexer {
 
 class Parser {
     public:
+        Parser(std::vector<Token> tokens);
+        ast::Expression* parse();
 
     private:
+        bool match(TokenType t, std::string s, int ahead);
+        void consume();
+
+        std::vector<Token> tokens;
+        int index;
+
 };
 
+class ExecutionEngine;
 class Function {
     public:
         Function(std::string name, std::vector<char> inputs, ast::Expression* expr);
+        ast::Expression* evaluate(ExecutionEngine& eng);
         std::string getName() const;
 
     private:
@@ -237,6 +251,7 @@ class Function {
 
 class ExecutionEngine {
     public:
+        ExecutionEngine();
         void registerFunction(Function* f);
         Function* retrieveFunction(std::string name);
         void deregisterFunction(std::string name);
@@ -245,6 +260,7 @@ class ExecutionEngine {
 
     private:
         std::unordered_map<std::string, Function*> functions;
+        Function* invokingFunction;
 };
 
 } // repl

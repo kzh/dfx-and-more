@@ -6,7 +6,7 @@ Log::Log(Expression* left, Expression* right)
     : BinaryOperator(left, right) {}
 
 //log_a(f(x))' = 1/(f(x)ln(a)) * f'(x)
-Expression* Log::derivative(Variable* respect) {
+Expression* Log::derivative(Function* respect) {
     auto ln = new Log(new E(), getLeft()->clone());
     auto product = new Product(getRight()->clone(), ln);
     auto divide = new Quotient(new Constant(1), product);
@@ -26,6 +26,12 @@ Expression* Log::simplify() {
         delete right;
         return new Constant(1);
     }
+
+/*
+    if (Power* r = dynamic_cast<Power*>(right)) {
+
+    }
+*/
 
     return new Log(left, right);
 }

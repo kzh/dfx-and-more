@@ -5,9 +5,16 @@ using namespace dfxam;
 repl::Function::Function(std::string name, std::vector<char> inputs, ast::Expression* expr)
     : name(name), inputs(inputs), expr(expr) {}
 
+ast::Expression* repl::Function::evaluate(repl::ExecutionEngine& eng) {
+    return expr->simplify();
+}
+
 std::string repl::Function::getName() const {
     return name;
 }
+
+repl::ExecutionEngine::ExecutionEngine()
+    : invokingFunction(nullptr) {}
 
 void repl::ExecutionEngine::registerFunction(Function* f) {
     functions[f->getName()] = f;
@@ -22,23 +29,8 @@ void repl::ExecutionEngine::deregisterFunction(std::string name) {
     functions.erase(name);
 }
 
-std::string printTokenType(repl::TokenType type) {
-    switch (type) {
-    case repl::TokenType::IDENTIFIER:
-        return "Identifier";
-    case repl::TokenType::NUMBER:
-        return "Number";
-    case repl::TokenType::OPERATOR:
-        return "Operator";
-    case repl::TokenType::SEPARATOR:
-        return "Separator";
-    }
-
-    return "";
-}
-
-void repl::ExecutionEngine::operator <<(std::string& expr) {
-    repl::Lexer lexer(expr);
+void repl::ExecutionEngine::operator <<(std::string& raw) {
+    repl::Lexer lexer(raw);
 
     std::vector<repl::Token> tokens;
     try {
@@ -48,9 +40,12 @@ void repl::ExecutionEngine::operator <<(std::string& expr) {
         return;
     }
 
-    for (auto it = tokens.begin(); it != tokens.end(); it++) {
-        std::cout << printTokenType((*it).getType()) << ": ";
-        std::cout << (*it).getContents();
-        std::cout << std::endl;
+    repl::Parser parser(tokens);
+
+    ast::Expression* expr;
+    try {
+        expr = parser.parse();
+    } catch (std::string ex) {
+        std::cout << ex;
     }
 }

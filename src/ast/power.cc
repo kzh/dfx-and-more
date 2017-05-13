@@ -6,7 +6,7 @@ Power::Power(Expression* left, Expression* right)
     : BinaryOperator(left, right) {}
 
 // (f(x) ^ g(x))' = (e ^ ln(f(x) ^ g(x))) * (g(x)ln(f(x)))' 
-Expression* Power::derivative(Variable* respect) {
+Expression* Power::derivative(Function* respect) {
     auto left = new Power(new E(), new Log(new E(), clone()));
     auto right = new Product(getRight()->clone(), new Log(new E(), getLeft()->clone()));
 
@@ -21,12 +21,12 @@ Expression* Power::simplify() {
 
     if (Log* l = dynamic_cast<Log*>(right)) {
         if (left->equals(l->getLeft())) {
-            auto ret = l->getRight()->clone();
+            auto r = l->getRight()->clone();
 
             delete left;
             delete right;
 
-            return ret;
+            return r; 
         }
     }
 
