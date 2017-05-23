@@ -3,6 +3,8 @@
 using namespace dfxam::ast;
 
 void testDerivative() {
+    dfxam::repl::ExecutionEngine engine;
+
     auto e = new E();                                // e
 
     auto two = new Constant(2);                      // 2
@@ -21,18 +23,20 @@ void testDerivative() {
     auto derivative = expr->derivative(x);
     std::cout << "Derivative: " << derivative << std::endl;
 
-    auto simplified = derivative->simplify();
+    auto simplified = derivative->simplify(&engine);
     std::cout << "Simplified Derivative: " << simplified << std::endl;
 }
 
 void testSimplification() {
+    dfxam::repl::ExecutionEngine engine;
+
     auto x = new Function("x");
     auto zero = new Constant(0);
 
     auto expr = new Sum(x, zero);
     std::cout << "Expression: " << expr << std::endl;
 
-    auto simplified = expr->simplify();
+    auto simplified = expr->simplify(&engine);
     std::cout << "Simplified: " << simplified << std::endl;
 }
 

@@ -14,11 +14,11 @@ Expression* Product::derivative(Function* respect) {
 }
 
 //TODO
-Expression* Product::simplify() {
+Expression* Product::simplify(repl::ExecutionEngine* eng) {
 //    std::cout << "Simplifying: " << this << std::endl;
 
-    Expression* left = getLeft()->simplify();
-    Expression* right = getRight()->simplify();
+    Expression* left = getLeft()->simplify(eng);
+    Expression* right = getRight()->simplify(eng);
 
     // multiplicative property of zero
     if (Constant::isConstantValue(left, 0) ||
@@ -48,18 +48,18 @@ std::string Product::toString() const {
     return s.str();
 }
 
-bool Product::equals(Expression* expr) {
+bool Product::equals(repl::ExecutionEngine* eng, Expression* expr) {
     Product* p = nullptr;
     if (!(p = dynamic_cast<Product*>(expr))) {
         return false;
     }
 
-    auto thisL = getLeft()->simplify();
-    auto thisR = getRight()->simplify();
-    auto exprL = p->getLeft()->simplify();
-    auto exprR = p->getRight()->simplify();
+    auto thisL = getLeft()->simplify(eng);
+    auto thisR = getRight()->simplify(eng);
+    auto exprL = p->getLeft()->simplify(eng);
+    auto exprR = p->getRight()->simplify(eng);
 
-    bool equality = thisL->equals(exprL) && thisR->equals(exprR);
+    bool equality = thisL->equals(eng, exprL) && thisR->equals(eng, exprR);
 
     delete thisL;
     delete thisR;

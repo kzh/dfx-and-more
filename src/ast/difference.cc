@@ -11,10 +11,10 @@ Expression* Difference::derivative(Function* respect) {
 }
 
 //TODO
-Expression* Difference::simplify() {
+Expression* Difference::simplify(repl::ExecutionEngine* eng) {
 //    std::cout << "Simplifying: " << this << std::endl;
-    auto left = getLeft()->simplify();
-    auto right = getRight()->simplify();
+    auto left = getLeft()->simplify(eng);
+    auto right = getRight()->simplify(eng);
 
     // 0 - x = -1 * x
     if (Constant::isConstantValue(left, 0)) {
@@ -38,18 +38,18 @@ std::string Difference::toString() const {
     return s.str();
 }
 
-bool Difference::equals(Expression* expr) {
+bool Difference::equals(repl::ExecutionEngine* eng, Expression* expr) {
     Difference* d = nullptr;
     if (!(d = dynamic_cast<Difference*>(expr))) {
         return false;
     }
 
-    auto thisL = getLeft()->simplify();
-    auto thisR = getRight()->simplify();
-    auto exprL = d->getLeft()->simplify();
-    auto exprR = d->getRight()->simplify();
+    auto thisL = getLeft()->simplify(eng);
+    auto thisR = getRight()->simplify(eng);
+    auto exprL = d->getLeft()->simplify(eng);
+    auto exprR = d->getRight()->simplify(eng);
 
-    bool equality = thisL->equals(exprL) && thisR->equals(exprR);
+    bool equality = thisL->equals(eng, exprL) && thisR->equals(eng, exprR);
 
     delete thisL;
     delete thisR;

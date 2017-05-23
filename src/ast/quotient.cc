@@ -17,10 +17,10 @@ Expression* Quotient::derivative(Function* respect) {
 }
 
 //TODO
-Expression* Quotient::simplify() {
+Expression* Quotient::simplify(repl::ExecutionEngine* eng) {
 //    std::cout << "Simplifying: " << this << std::endl;
-    auto left = getLeft()->simplify();
-    auto right = getRight()->simplify();
+    auto left = getLeft()->simplify(eng);
+    auto right = getRight()->simplify(eng);
 
     if (Constant::isConstantValue(left, 0)) {
         delete left;
@@ -38,18 +38,18 @@ std::string Quotient::toString() const {
     return s.str();
 }
 
-bool Quotient::equals(Expression* expr) {
+bool Quotient::equals(repl::ExecutionEngine* eng, Expression* expr) {
     Quotient* q = nullptr;
     if (!(q = dynamic_cast<Quotient*>(expr))) {
         return false;
     }
 
-    auto thisL = getLeft()->simplify();
-    auto thisR = getRight()->simplify();
-    auto exprL = q->getLeft()->simplify();
-    auto exprR = q->getRight()->simplify();
+    auto thisL = getLeft()->simplify(eng);
+    auto thisR = getRight()->simplify(eng);
+    auto exprL = q->getLeft()->simplify(eng);
+    auto exprR = q->getRight()->simplify(eng);
 
-    bool equality = thisL->equals(exprL) && thisR->equals(exprR);
+    bool equality = thisL->equals(eng, exprL) && thisR->equals(eng, exprR);
 
     delete thisL;
     delete thisR;

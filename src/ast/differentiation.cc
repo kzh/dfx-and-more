@@ -17,7 +17,7 @@ Expression* Differentiation::derivative(Function* respect) {
     return new Differentiation(this, respect);
 }
 
-Expression* Differentiation::simplify() {
+Expression* Differentiation::simplify(repl::ExecutionEngine* eng) {
     return expr->derivative(respect);
 }
 
@@ -33,16 +33,16 @@ Expression* Differentiation::clone() {
                                new Function(respect->getName()));
 }
 
-bool Differentiation::equals(Expression* expr) {
+bool Differentiation::equals(repl::ExecutionEngine* eng, Expression* expr) {
     Differentiation* d = nullptr;
     if (!(d = dynamic_cast<Differentiation*>(expr))) {
         return false;
     }
 
-    auto thisExpr = getExpression()->simplify();
-    auto otherExpr = d->getExpression()->simplify(); 
+    auto thisExpr = getExpression()->simplify(eng);
+    auto otherExpr = d->getExpression()->simplify(eng); 
 
-    bool equality = thisExpr->equals(otherExpr) && getRespect()->getName() == d->getRespect()->getName();
+    bool equality = thisExpr->equals(eng, otherExpr) && getRespect()->getName() == d->getRespect()->getName();
 
     delete thisExpr;
     delete otherExpr;

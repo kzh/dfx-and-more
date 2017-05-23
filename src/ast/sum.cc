@@ -10,11 +10,11 @@ Expression* Sum::derivative(Function* respect) {
     return new Sum(getLeft()->derivative(respect), getRight()->derivative(respect));
 }
 
-Expression* Sum::simplify() {
+Expression* Sum::simplify(repl::ExecutionEngine* eng) {
 //    std::cout << "Simplifying: " << this << std::endl;
 
-    Expression* left = getLeft()->simplify();
-    Expression* right = getRight()->simplify();
+    Expression* left = getLeft()->simplify(eng);
+    Expression* right = getRight()->simplify(eng);
 
     /* additive identity property */
 
@@ -38,18 +38,18 @@ std::string Sum::toString() const {
     return s.str();
 }
 
-bool Sum::equals(Expression* expr) {
+bool Sum::equals(repl::ExecutionEngine* eng, Expression* expr) {
     Sum* s = nullptr;
     if (!(s = dynamic_cast<Sum*>(expr))) {
         return false;
     }
 
-    auto thisL = getLeft()->simplify();
-    auto thisR = getRight()->simplify();
-    auto exprL = s->getLeft()->simplify();
-    auto exprR = s->getRight()->simplify();
+    auto thisL = getLeft()->simplify(eng);
+    auto thisR = getRight()->simplify(eng);
+    auto exprL = s->getLeft()->simplify(eng);
+    auto exprR = s->getRight()->simplify(eng);
 
-    bool equality = thisL->equals(exprL) && thisR->equals(exprR);
+    bool equality = thisL->equals(eng, exprL) && thisR->equals(eng, exprR);
 
     delete thisL;
     delete thisR;

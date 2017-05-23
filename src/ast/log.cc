@@ -14,14 +14,14 @@ Expression* Log::derivative(Function* respect) {
     return new Product(divide, getRight()->derivative(respect));
 }
 
-Expression* Log::simplify() {
+Expression* Log::simplify(repl::ExecutionEngine* eng) {
 //    std::cout << "Simplifying: " << this << std::endl;
 
-    auto left = getLeft()->simplify();
-    auto right = getRight()->simplify();
+    auto left = getLeft()->simplify(eng);
+    auto right = getRight()->simplify(eng);
 
     // log_x(x) =  1
-    if (left->equals(right)) {
+    if (left->equals(eng, right)) {
         delete left;
         delete right;
         return new Constant(1);
@@ -44,18 +44,18 @@ std::string Log::toString() const {
     return s.str();
 }
 
-bool Log::equals(Expression* expr) {
+bool Log::equals(repl::ExecutionEngine* eng, Expression* expr) {
     Log* l = nullptr;
     if (!(l = dynamic_cast<Log*>(expr))) {
         return false;
     }
 
-    auto thisL = getLeft()->simplify();
-    auto thisR = getRight()->simplify();
-    auto exprL = l->getLeft()->simplify();
-    auto exprR = l->getRight()->simplify();
+    auto thisL = getLeft()->simplify(eng);
+    auto thisR = getRight()->simplify(eng);
+    auto exprL = l->getLeft()->simplify(eng);
+    auto exprR = l->getRight()->simplify(eng);
 
-    bool equality = thisL->equals(exprL) && thisR->equals(exprR);
+    bool equality = thisL->equals(eng, exprL) && thisR->equals(eng, exprR);
 
     delete thisL;
     delete thisR;

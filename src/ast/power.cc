@@ -14,13 +14,14 @@ Expression* Power::derivative(Function* respect) {
 }
 
 //TODO
-Expression* Power::simplify() {
+Expression* Power::simplify(repl::ExecutionEngine* eng) {
 //    std::cout << "Simplifying: " << this << std::endl;
-    auto left = getLeft()->simplify();
-    auto right = getRight()->simplify();
+    auto left = getLeft()->simplify(eng);
+    auto right = getRight()->simplify(eng);
 
+    // a ^ log_a(x) = x
     if (Log* l = dynamic_cast<Log*>(right)) {
-        if (left->equals(l->getLeft())) {
+        if (left->equals(eng, l->getLeft())) {
             auto r = l->getRight()->clone();
 
             delete left;
@@ -40,18 +41,18 @@ std::string Power::toString() const {
     return s.str();
 }
 
-bool Power::equals(Expression* expr) {
+bool Power::equals(repl::ExecutionEngine* eng, Expression* expr) {
     Power* p = nullptr;
     if (!(p = dynamic_cast<Power*>(expr))) {
         return false;
     }
 
-    auto thisL = getLeft()->simplify();
-    auto thisR = getRight()->simplify();
-    auto exprL = p->getLeft()->simplify();
-    auto exprR = p->getRight()->simplify();
+    auto thisL = getLeft()->simplify(eng);
+    auto thisR = getRight()->simplify(eng);
+    auto exprL = p->getLeft()->simplify(eng);
+    auto exprR = p->getRight()->simplify(eng);
 
-    bool equality = thisL->equals(exprL) && thisR->equals(exprR);
+    bool equality = thisL->equals(eng, exprL) && thisR->equals(eng, exprR);
 
     delete thisL;
     delete thisR;

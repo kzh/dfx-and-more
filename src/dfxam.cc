@@ -3,7 +3,7 @@
 using namespace dfxam;
 
 int main() {
-    dfxam::repl::ExecutionEngine eng;
+    repl::ExecutionEngine eng;
 
     while (true) {
         std::cout << ">> ";

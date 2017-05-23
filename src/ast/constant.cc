@@ -15,7 +15,7 @@ Expression* Constant::derivative(Function* respect) {
     return new Constant(0);
 }
 
-Expression* Constant::simplify() {
+Expression* Constant::simplify(repl::ExecutionEngine* eng) {
 //    std::cout << "Simplifying: " << this << std::endl;
 
     return clone();
@@ -28,7 +28,7 @@ std::string Constant::toString() const {
     return s.str();
 }
 
-bool Constant::equals(Expression* expr) {
+bool Constant::equals(repl::ExecutionEngine* eng, Expression* expr) {
     if (!expr->isConstant()) {
         return false;
     }
