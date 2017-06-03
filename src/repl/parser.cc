@@ -50,16 +50,62 @@ ast::Expression* repl::Parser::parseAssignment() {
     return new ast::Assignment(static_cast<ast::Function*>(func), expr);
 }
 
-ast::Expression* repl::Parser::parseExpression() {
-    ast::Expression* primary;
+ast::Expression* repl::Parser::parseExpression(int minPrecedence) {
+    ast::Expression* lhs = parseAtom();
 
-    if (ast::Expression* constant = parseConstant()) {
-        primary = constant;
-    } else if (ast::Expression* invoc = parseInvocation()) {
-        primary = invoc;
+    while (match(TokenType::OPERATOR, "", 0)) {
+        std::string op = peek().getContents();
+        OperatorInfo info = OP_INFO[op];
+
+        int prec = std::get<1>(info);
+        if (prec < minPrecedence) {
+            break;
+        }
+        consume();
+
+        if (std::get<0>(info) == Associativity::LEFT) {
+            prec++;
+        }
+
+        ast::Expression* rhs = parseExpression(prec);
+        lhs = parseBinop(op, lhs, rhs);
     }
 
-    return primary;
+    return lhs;
+}
+
+ast::Expression* repl::Parser::parseAtom() {
+    if (ast::Expression* constant = parseConstant()) {
+        return constant;
+    } else if (ast::Expression* invoc = parseInvocation()) {
+        return invoc;
+    } else if (match(TokenType::SEPARATOR, "(", 0)) {
+        consume();
+        ast::Expression* expr = parseExpression();
+
+        if (match(TokenType::SEPARATOR, ")", 0)) {
+            consume();
+            return expr;
+        }
+    }
+
+    return nullptr;
+}
+
+ast::Expression* repl::Parser::parseBinop(std::string op, ast::Expression* lhs, ast::Expression* rhs) {
+    if (op == "+") {
+        return new ast::Sum(lhs, rhs);
+    } else if (op == "*") {
+        return new ast::Product(lhs, rhs);
+    } else if (op == "-") {
+        return new ast::Difference(lhs, rhs);
+    } else if (op == "/") {
+        return new ast::Quotient(lhs, rhs);
+    } else if (op == "^") {
+        return new ast::Power(lhs, rhs);
+    }
+
+    return nullptr;
 }
 
 ast::Expression* repl::Parser::parseConstant() {

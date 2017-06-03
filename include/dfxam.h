@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 #include <stack>
+#include <tuple>
 
 namespace dfxam {
 namespace repl {
@@ -253,6 +254,17 @@ class Lexer {
         std::vector<Token> tokens;
 };
 
+enum class Associativity { LEFT, RIGHT };
+
+typedef std::tuple<Associativity, int> OperatorInfo;
+static std::unordered_map<std::string, OperatorInfo> OP_INFO = {
+    {"+", std::make_tuple(Associativity::LEFT, 1)},
+    {"-", std::make_tuple(Associativity::LEFT, 1)},
+    {"*", std::make_tuple(Associativity::LEFT, 2)},
+    {"/", std::make_tuple(Associativity::LEFT, 2)},
+    {"^", std::make_tuple(Associativity::RIGHT, 3)}
+};
+
 class Parser {
     public:
         Parser(std::vector<Token> tokens);
@@ -263,10 +275,13 @@ class Parser {
         Token& peek();
         void consume();
 
-        ast::Expression* parseExpression();
         ast::Expression* parseAssignment();
-        ast::Expression* parseInvocation();
 
+        ast::Expression* parseExpression(int minPrecedence = 0);
+        ast::Expression* parseAtom();
+        ast::Expression* parseBinop(std::string op, ast::Expression* lhs, ast::Expression* rhs);
+
+        ast::Expression* parseInvocation();
         ast::Expression* parseConstant();
 
         std::vector<Token> tokens;
