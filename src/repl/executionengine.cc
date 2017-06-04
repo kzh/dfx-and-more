@@ -2,29 +2,49 @@
 
 using namespace dfxam;
 
-repl::Function::Function(std::string name, std::vector<ast::Expression*> inputs, ast::Expression* expr)
-    : name(name), inputs(inputs), expr(expr) {}
+repl::Function::Function(std::string name, ast::Expression* expr) 
+    : name(name), expr(expr) {}
 
 repl::Function::Function(ast::Assignment* a)
-    : name(a->getFunction()->getName()), 
-      inputs(a->getFunction()->getArguments()), 
-      expr(a->getExpression()) {}
+    : Function(a->getFunction()->getName(), a->getExpression()) {
+    std::vector<ast::Expression*> ins = a->getFunction()->getArguments();
+    for (auto it = ins.begin(); it != ins.end(); it++) {
+        ast::Function* func = dynamic_cast<ast::Function*>(*it);
+        if (func) {
+            this->inputs.push_back(func->getName());
+        }
+    }
+}
 
-ast::Expression* repl::Function::evaluate(repl::ExecutionEngine* eng) {
-    return expr->simplify(eng);
+ast::Expression* repl::Function::getExpression() const {
+    return expr;
 }
 
 std::string repl::Function::getName() const {
     return name;
 }
 
-void repl::ExecutionEngine::registerFunction(Function* f) {
+std::vector<std::string> repl::Function::getInputs() const {
+    return inputs;
+}
+
+void repl::ExecutionEngine::registerFunction(repl::Function* f) {
     functions[f->getName()] = f;
 }
 
-repl::Function* repl::ExecutionEngine::retrieveFunction(std::string name) {
+repl::Function* repl::ExecutionEngine::locateFunction(std::string name) {
     auto find = functions.find(name);
     return find == functions.end() ? nullptr : find->second;
+}
+
+repl::Function* repl::ExecutionEngine::retrieveFunction(std::string name) {
+    Function* f;
+    if ((f = locateFunction(getScopedName(name))) ||
+        (f = locateFunction(name))) {
+        return f;
+    }
+
+    return nullptr;
 }
 
 void repl::ExecutionEngine::deregisterFunction(std::string name) {
@@ -34,6 +54,23 @@ void repl::ExecutionEngine::deregisterFunction(std::string name) {
     } 
 
     functions.erase(name);
+}
+
+std::string repl::ExecutionEngine::getScopedName(std::string name) {
+    if (callStack.size() == 0) {
+        return name;
+    } else {
+        Function* f = callStack.top();
+        return f->getName() + "_" + name;
+    }
+}
+
+void repl::ExecutionEngine::pushCall(Function* f) {
+    callStack.push(f); 
+}
+
+void repl::ExecutionEngine::popCall() {
+    callStack.pop();
 }
 
 void repl::ExecutionEngine::operator <<(std::string& raw) {

@@ -292,22 +292,29 @@ class Parser {
 class ExecutionEngine;
 class Function {
     public:
-        Function(std::string name, std::vector<ast::Expression*> inputs, ast::Expression* expr);
+        Function(std::string name, ast::Expression* expr);
         Function(ast::Assignment* a); 
-        ast::Expression* evaluate(ExecutionEngine* eng);
+
         std::string getName() const;
+        std::vector<std::string> getInputs() const;
+        ast::Expression* getExpression() const;
 
     private:
         std::string name;
-        std::vector<ast::Expression*> inputs;
+        std::vector<std::string> inputs;
         ast::Expression* expr;
 };
 
 class ExecutionEngine {
     public:
         void registerFunction(Function* f);
+        Function* locateFunction(std::string name);
         Function* retrieveFunction(std::string name);
         void deregisterFunction(std::string name);
+
+        std::string getScopedName(std::string var);
+        void pushCall(Function* f);
+        void popCall();
 
         void operator <<(std::string& expr);
         void execute(ast::Expression* expr);

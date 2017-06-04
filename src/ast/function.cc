@@ -25,13 +25,41 @@ Expression* Function::derivative(Function* respect) {
 }
 
 Expression* Function::simplify(repl::ExecutionEngine* eng) {
-//    std::cout << "Simplifying: " << this << std::endl;
     repl::Function* f;
     if (!(f = eng->retrieveFunction(name))) {
         return clone();
     }
 
-    return f->evaluate(eng);
+    // simplify the inputs in regards to current call frame
+    std::vector<ast::Expression*> simpInputs; 
+    for (int i = 0; i < inputs.size(); i++) {
+        simpInputs.push_back(inputs[i]->simplify(eng));
+    }
+
+    // add function call to stack
+    eng->pushCall(f);
+
+    // bind function inputs to function call frame
+    std::vector<std::string> inputNames = f->getInputs();
+    for (int i = 0; i < inputs.size(); i++) {
+        std::string n = eng->getScopedName(inputNames[i]);
+        repl::Function* temp = new repl::Function(n, simpInputs[i]);
+        eng->registerFunction(temp);
+    }
+
+    // eval
+    ast::Expression* val = f->getExpression()->simplify(eng);
+
+    // unbind function inpus to function call frame
+    for (int i = 0; i < inputs.size(); i++) {
+        std::string n = eng->getScopedName(inputNames[i]);
+        eng->deregisterFunction(n);
+    }
+
+    // pop function call from stack
+    eng->popCall();
+
+    return val;
 }
 
 std::string Function::toString() const {
