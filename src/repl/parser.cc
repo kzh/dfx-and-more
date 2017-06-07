@@ -133,6 +133,12 @@ ast::Expression* repl::Parser::parseInvocation() {
     Token& name = peek();
     consume();
 
+    int derivative = 0;
+    while (match(repl::TokenType::OPERATOR, "'", 0)) {
+        derivative++;
+        consume();
+    }
+
     std::vector<ast::Expression*> args;
     if (match(repl::TokenType::SEPARATOR, "(", 0)) {
         consume();
@@ -148,5 +154,7 @@ ast::Expression* repl::Parser::parseInvocation() {
         consume();
     }
 
-    return new ast::Function(name.getContents(), args); 
+    ast::Function* f  = new ast::Function(name.getContents(), args);
+    f->setDerivative(derivative);
+    return f;
 }

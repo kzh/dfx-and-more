@@ -65,6 +65,7 @@ class Function : public Expression {
 
         std::string getName() const;
         std::vector<Expression*> getArguments() const;
+        void setDerivative(int level);
 
         Expression* derivative(Function* respect) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
@@ -76,6 +77,7 @@ class Function : public Expression {
     private:
         std::string name;
         std::vector<Expression*> inputs;
+        int differentiate;
 };
 
 class Differentiation : public Expression {

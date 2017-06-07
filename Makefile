@@ -6,7 +6,7 @@ SRCS= $(wildcard src/repl/*.cc) $(wildcard src/ast/*.cc)
 INCLUDES=include/
 
 all:
-	$(COMPILER) $(FLAGS) $(MAIN) $(SRCS) -I $(INCLUDES)
+	$(COMPILER) $(FLAGS) $(MAIN) $(SRCS) -I $(INCLUDES) -o dfxam
 
 test:
 	$(COMPILER) $(FLAGS) $(TEST) $(SRCS) -I $(INCLUDES)

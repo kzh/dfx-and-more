@@ -106,7 +106,7 @@ void Lexer::lexSeparator() {
 }
 
 bool Lexer::isOperator(char c) {
-    std::string operators = "+-*/=^";
+    std::string operators = "+-*/=^'";
     return operators.find(c) != std::string::npos;
 }
 
