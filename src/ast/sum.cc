@@ -6,8 +6,12 @@ Sum::Sum(Expression* left, Expression* right)
     : BinaryOperator(left, right) {}
 
 // (f(x) + g(x))'  = f'(x) + g'(x)
-Expression* Sum::derivative(Function* respect) {
-    return new Sum(getLeft()->derivative(respect), getRight()->derivative(respect));
+Expression* Sum::derivative(repl::ExecutionEngine* eng, Function* respect) {
+    return new Sum(getLeft()->derivative(eng, respect), getRight()->derivative(eng, respect));
+}
+
+Expression* Sum::substitute(repl::ExecutionEngine* eng) {
+    return new Sum(getLeft()->substitute(eng), getRight()->substitute(eng));
 }
 
 Expression* Sum::simplify(repl::ExecutionEngine* eng) {

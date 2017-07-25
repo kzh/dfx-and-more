@@ -37,17 +37,30 @@ ast::Expression* repl::Parser::parse() {
 }
 
 ast::Expression* repl::Parser::parseAssignment() {
-    int rollback = index;
+    if (!match(repl::TokenType::IDENTIFIER, "", 0) ||
+        !match(repl::TokenType::SEPARATOR, "(", 1)) {
+        return nullptr;
+    }
 
-    ast::Expression* func = parseInvocation();
-    if (!func || !match(repl::TokenType::OPERATOR, "=", 0)) {
+    ast::Function* name = new ast::Function(peek().getContents());
+
+    int rollback = index;
+    consume();
+
+    ast::Expression* func = parseInvocation(name);
+    if (!func || func == name || !match(repl::TokenType::OPERATOR, "=", 0)) {
         index = rollback;
+
+        if (func) {
+            delete func;
+        }
+
         return nullptr;
     }
     consume();
 
     ast::Expression* expr = parseExpression();
-    return new ast::Assignment(static_cast<ast::Function*>(func), expr);
+    return new ast::Assignment(static_cast<ast::Invocation*>(func), expr);
 }
 
 ast::Expression* repl::Parser::parseExpression(int minPrecedence) {
@@ -75,21 +88,34 @@ ast::Expression* repl::Parser::parseExpression(int minPrecedence) {
 }
 
 ast::Expression* repl::Parser::parseAtom() {
+    if (match(TokenType::OPERATOR, "-", 0)) {
+        consume();
+
+        ast::Constant* neg = new ast::Constant(-1);
+        return new ast::Product(neg, parseAtom());
+    }
+
+    ast::Expression* expr = nullptr;
     if (ast::Expression* constant = parseConstant()) {
-        return constant;
-    } else if (ast::Expression* invoc = parseInvocation()) {
-        return invoc;
+        expr = constant;
+    } else if (match(TokenType::IDENTIFIER, "", 0)) {
+        expr = new ast::Function(peek().getContents());
+        consume();
     } else if (match(TokenType::SEPARATOR, "(", 0)) {
         consume();
-        ast::Expression* expr = parseExpression();
+        expr = parseExpression();
 
         if (match(TokenType::SEPARATOR, ")", 0)) {
             consume();
-            return expr;
         }
     }
 
-    return nullptr;
+    while (match(TokenType::OPERATOR, "'", 0)) {
+        expr = new ast::Differentiation(expr);
+        consume();
+    }
+
+    return parseInvocation(expr);
 }
 
 ast::Expression* repl::Parser::parseBinop(std::string op, ast::Expression* lhs, ast::Expression* rhs) {
@@ -125,36 +151,22 @@ ast::Expression* repl::Parser::parseConstant() {
     return nullptr;
 }
 
-ast::Expression* repl::Parser::parseInvocation() {
-    if (!match(repl::TokenType::IDENTIFIER, "", 0)) {
-        return nullptr;
+ast::Expression* repl::Parser::parseInvocation(ast::Expression* expr) {
+    if (!expr || !match(repl::TokenType::SEPARATOR, "(", 0)) {
+        return expr;
     }
-
-    Token& name = peek();
     consume();
 
-    int derivative = 0;
-    while (match(repl::TokenType::OPERATOR, "'", 0)) {
-        derivative++;
-        consume();
-    }
-
     std::vector<ast::Expression*> args;
-    if (match(repl::TokenType::SEPARATOR, "(", 0)) {
-        consume();
+    while (!match(repl::TokenType::SEPARATOR, ")", 0)) {
+        args.push_back(parseExpression());
 
-        while (!match(repl::TokenType::SEPARATOR, ")", 0)) {
-            args.push_back(parseExpression());
-
-            if (match(repl::TokenType::SEPARATOR, ",", 0)) {
-                consume();
-            }
+        if (match(repl::TokenType::SEPARATOR, ",", 0)) {
+            consume();
         }
-
-        consume();
     }
+    consume();
 
-    ast::Function* f  = new ast::Function(name.getContents(), args);
-    f->setDerivative(derivative);
+    ast::Invocation* f  = new ast::Invocation(expr, args);
     return f;
 }

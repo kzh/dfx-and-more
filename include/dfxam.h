@@ -18,7 +18,8 @@ namespace ast {
 class Function;
 class Expression {
     public:
-        virtual Expression* derivative(Function* respect) = 0;
+        virtual Expression* derivative(repl::ExecutionEngine* eng, Function* respect) = 0;
+        virtual Expression* substitute(repl::ExecutionEngine* eng) = 0;
         virtual Expression* simplify(repl::ExecutionEngine* eng) = 0;
         virtual std::string toString() const = 0;
 
@@ -35,7 +36,8 @@ class Constant: public Expression {
         Constant(double val);
         double getValue() const;
 
-        Expression* derivative(Function* respect) override;
+        Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
+        Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
         std::string toString() const override;
 
@@ -60,14 +62,11 @@ class E : public Constant {
 
 class Function : public Expression {
     public:
-        Function(std::string f);
-        Function(std::string f, std::vector<Expression*> inputs);
+        Function(std::string name);
 
         std::string getName() const;
-        std::vector<Expression*> getArguments() const;
-        void setDerivative(int level);
-
-        Expression* derivative(Function* respect) override;
+        Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
+        Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
         std::string toString() const override;
 
@@ -75,18 +74,38 @@ class Function : public Expression {
         Expression* clone() override;
 
     private:
-        std::string name;
-        std::vector<Expression*> inputs;
-        int differentiate;
+        std::string name; 
+};
+
+class Invocation : public Expression {
+    public:
+        Invocation(Expression* expr, std::vector<Expression*> inputs);
+
+        Expression* getExpression() const;
+        std::vector<Expression*>& getArguments();
+
+        Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
+        Expression* substitute(repl::ExecutionEngine* eng) override;
+        Expression* simplify(repl::ExecutionEngine* eng) override;
+        std::string toString() const override;
+
+        bool equals(repl::ExecutionEngine* eng, Expression* expr) override;
+        Expression* clone() override;
+
+    private:
+        Expression* expr;
+        std::vector<Expression*> arguments;
 };
 
 class Differentiation : public Expression {
     public:
+        Differentiation(Expression* expr);
         Differentiation(Expression* expr, Function* respect);
         Expression* getExpression() const;
         Function* getRespect() const;
 
-        Expression* derivative(Function* respect) override;
+        Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
+        Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
         std::string toString() const override;
 
@@ -122,7 +141,8 @@ class Power : public BinaryOperator {
     public:
         Power(Expression* left, Expression* right);
 
-        Expression* derivative(Function* respect) override;
+        Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
+        Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
         std::string toString() const override;
 
@@ -134,7 +154,8 @@ class Log : public BinaryOperator {
     public:
         Log(Expression* left, Expression* right);
 
-        Expression* derivative(Function* respect) override;
+        Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
+        Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
         std::string toString() const override;
 
@@ -146,7 +167,8 @@ class Sum : public BinaryOperator {
     public:
         Sum(Expression* left, Expression* right);
 
-        Expression* derivative(Function* respect) override;
+        Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
+        Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
         std::string toString() const override;
 
@@ -158,7 +180,8 @@ class Difference : public BinaryOperator {
     public:
         Difference(Expression* left, Expression* right);
 
-        Expression* derivative(Function* respect) override;
+        Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
+        Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
         std::string toString() const override;
 
@@ -170,7 +193,8 @@ class Product : public BinaryOperator {
     public:
         Product(Expression* left, Expression* right);
 
-        Expression* derivative(Function* respect) override;
+        Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
+        Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
         std::string toString() const override;
 
@@ -182,7 +206,8 @@ class Quotient : public BinaryOperator {
     public:
         Quotient(Expression* left, Expression* right);
 
-        Expression* derivative(Function* respect) override;
+        Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
+        Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
         std::string toString() const override;
 
@@ -194,12 +219,13 @@ class Quotient : public BinaryOperator {
 // to store function in memory
 class Assignment : public Expression {
     public:
-        Assignment(Function* f, Expression* expr);
+        Assignment(Invocation* f, Expression* expr);
 
-        Function* getFunction() const;
+        Invocation* getDeclaration() const;
         Expression* getExpression() const;
 
-        Expression* derivative(Function* respect) override;
+        Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
+        Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
         std::string toString() const override;
 
@@ -209,7 +235,7 @@ class Assignment : public Expression {
         ~Assignment();
 
     private:
-        Function* f;
+        Invocation* f;
         Expression* expr;
 };
 
@@ -283,7 +309,7 @@ class Parser {
         ast::Expression* parseAtom();
         ast::Expression* parseBinop(std::string op, ast::Expression* lhs, ast::Expression* rhs);
 
-        ast::Expression* parseInvocation();
+        ast::Expression* parseInvocation(ast::Expression* expr);
         ast::Expression* parseConstant();
 
         std::vector<Token> tokens;
@@ -307,23 +333,35 @@ class Function {
         ast::Expression* expr;
 };
 
+class Frame {
+    public:
+        Frame(std::vector<ast::Expression*> args);
+
+        bool bindParameters(std::vector<std::string> params);
+        ast::Expression* getArg(std::string name);
+
+    private:
+        std::unordered_map<std::string, int> parameters;
+        std::vector<ast::Expression*> arguments;
+};
+
 class ExecutionEngine {
     public:
         void registerFunction(Function* f);
-        Function* locateFunction(std::string name);
         Function* retrieveFunction(std::string name);
         void deregisterFunction(std::string name);
 
-        std::string getScopedName(std::string var);
-        void pushCall(Function* f);
-        void popCall();
+        ast::Expression* getFrameArg(std::string name);
+        bool bindFrameParameters(std::vector<std::string> params);
+        void pushFrame(std::vector<ast::Expression*> args);
+        void popFrame();
 
         void operator <<(std::string& expr);
         void execute(ast::Expression* expr);
 
     private:
         std::unordered_map<std::string, Function*> functions;
-        std::stack<Function*> callStack;
+        std::stack<Frame> callStack;
 };
 
 } // repl

@@ -2,10 +2,10 @@
 
 using namespace dfxam::ast;
 
-Assignment::Assignment(Function* f, Expression* expr)
+Assignment::Assignment(Invocation* f, Expression* expr)
     : f(f), expr(expr) {}
 
-Function* Assignment::getFunction() const {
+Invocation* Assignment::getDeclaration() const {
     return f;
 }
 
@@ -13,7 +13,11 @@ Expression* Assignment::getExpression() const {
     return expr;
 }
 
-Expression* Assignment::derivative(Function* respect) {
+Expression* Assignment::derivative(repl::ExecutionEngine* eng, Function* respect) {
+    return nullptr;
+}
+
+Expression* Assignment::substitute(repl::ExecutionEngine* eng) {
     return nullptr;
 }
 

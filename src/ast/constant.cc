@@ -11,8 +11,12 @@ double Constant::getValue() const {
     return value;
 }
 
-Expression* Constant::derivative(Function* respect) {
+Expression* Constant::derivative(repl::ExecutionEngine* eng, Function* respect) {
     return new Constant(0);
+}
+
+Expression* Constant::substitute(repl::ExecutionEngine* eng) {
+    return clone();
 }
 
 Expression* Constant::simplify(repl::ExecutionEngine* eng) {

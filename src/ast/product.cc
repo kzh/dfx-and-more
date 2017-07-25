@@ -6,14 +6,17 @@ Product::Product(Expression* left, Expression* right)
     : BinaryOperator(left, right) {}
 
 // (f(x) * g(x))' = f'(x)g(x) + f(x)g'(x)
-Expression* Product::derivative(Function* respect) {
-    auto left = new Product(getLeft()->derivative(respect), getRight()->clone());
-    auto right = new Product(getLeft()->clone(), getRight()->derivative(respect));
+Expression* Product::derivative(repl::ExecutionEngine* eng, Function* respect) {
+    auto left = new Product(getLeft()->derivative(eng, respect), getRight()->clone());
+    auto right = new Product(getLeft()->clone(), getRight()->derivative(eng, respect));
 
     return new Sum(left, right);
 }
 
-//TODO
+Expression* Product::substitute(repl::ExecutionEngine* eng) {
+    return new Product(getLeft()->substitute(eng), getRight()->substitute(eng));
+}
+
 Expression* Product::simplify(repl::ExecutionEngine* eng) {
 //    std::cout << "Simplifying: " << this << std::endl;
 

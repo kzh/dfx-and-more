@@ -6,11 +6,14 @@ Difference::Difference(Expression* left, Expression* right)
     : BinaryOperator(left, right) {}
 
 // (f(x) - g(x))' = f'(x) - g'(x)
-Expression* Difference::derivative(Function* respect) {
-    return new Difference(getLeft()->derivative(respect), getRight()->derivative(respect));
+Expression* Difference::derivative(repl::ExecutionEngine* eng, Function* respect) {
+    return new Difference(getLeft()->derivative(eng, respect), getRight()->derivative(eng, respect));
 }
 
-//TODO
+Expression* Difference::substitute(repl::ExecutionEngine* eng) {
+    return new Difference(getLeft()->substitute(eng), getRight()->substitute(eng));
+}
+
 Expression* Difference::simplify(repl::ExecutionEngine* eng) {
 //    std::cout << "Simplifying: " << this << std::endl;
     auto left = getLeft()->simplify(eng);

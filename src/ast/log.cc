@@ -6,12 +6,16 @@ Log::Log(Expression* left, Expression* right)
     : BinaryOperator(left, right) {}
 
 //log_a(f(x))' = 1/(f(x)ln(a)) * f'(x)
-Expression* Log::derivative(Function* respect) {
+Expression* Log::derivative(repl::ExecutionEngine* eng, Function* respect) {
     auto ln = new Log(new E(), getLeft()->clone());
     auto product = new Product(getRight()->clone(), ln);
     auto divide = new Quotient(new Constant(1), product);
 
-    return new Product(divide, getRight()->derivative(respect));
+    return new Product(divide, getRight()->derivative(eng, respect));
+}
+
+Expression* Log::substitute(repl::ExecutionEngine* eng) {
+    return new Log(getLeft()->substitute(eng), getRight()->substitute(eng));
 }
 
 Expression* Log::simplify(repl::ExecutionEngine* eng) {

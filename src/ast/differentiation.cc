@@ -2,6 +2,9 @@
 
 using namespace dfxam::ast;
 
+Differentiation::Differentiation(Expression* expr)
+    : expr(expr) {}
+
 Differentiation::Differentiation(Expression* expr, Function* respect)
     : expr(expr), respect(respect) {}
 
@@ -13,12 +16,32 @@ Function* Differentiation::getRespect() const {
     return respect;
 }
 
-Expression* Differentiation::derivative(Function* respect) {
+Expression* Differentiation::derivative(repl::ExecutionEngine* eng, Function* respect) {
     return new Differentiation(this, respect);
 }
 
+Expression* Differentiation::substitute(repl::ExecutionEngine* eng) {
+    Expression* subExpr = expr->substitute(eng);
+
+    if (!respect) {
+        return new Differentiation(subExpr);
+    }
+
+    Expression* subRespect = respect->substitute(eng);
+    Function* resp;
+
+    if (!(resp = dynamic_cast<Function*>(subRespect))) {
+        delete subExpr;
+        delete subRespect;
+
+        return nullptr;
+    }
+
+    return new Differentiation(subExpr, resp);
+}
+
 Expression* Differentiation::simplify(repl::ExecutionEngine* eng) {
-    return expr->derivative(respect);
+    return expr->derivative(eng, respect);
 }
 
 std::string Differentiation::toString() const {
