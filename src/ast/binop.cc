@@ -24,6 +24,14 @@ void BinaryOperator::setRight(Expression* r) {
     right = r;
 }
 
+Function* BinaryOperator::getVar() {
+    if (Function* lvar = left->getVar()) {
+        return lvar;
+    }
+
+    return right->getVar();
+}
+
 Expression* BinaryOperator::getLeft() const {
     return left;
 }

@@ -17,7 +17,7 @@ Function* Differentiation::getRespect() const {
 }
 
 Expression* Differentiation::derivative(repl::ExecutionEngine* eng, Function* respect) {
-    return new Differentiation(this, respect);
+    return simplify(eng);
 }
 
 Expression* Differentiation::substitute(repl::ExecutionEngine* eng) {
@@ -42,6 +42,10 @@ Expression* Differentiation::substitute(repl::ExecutionEngine* eng) {
 
 Expression* Differentiation::simplify(repl::ExecutionEngine* eng) {
     return expr->derivative(eng, respect);
+}
+
+Function* Differentiation::getVar() {
+    return respect;
 }
 
 std::string Differentiation::toString() const {

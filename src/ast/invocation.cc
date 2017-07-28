@@ -28,15 +28,31 @@ Expression* Invocation::substitute(repl::ExecutionEngine* eng) {
 
 Expression* Invocation::simplify(repl::ExecutionEngine* eng) {
     eng->pushFrame(arguments);
+
+    std::cout << "broke1" << std::endl;
     Expression* simpl = expr->simplify(eng);
+    std::cout << "broke2" << std::endl;
     Expression* sub = simpl->substitute(eng);
+    std::cout << "broke3" << std::endl;
     Expression* ret = sub->simplify(eng);
+    std::cout << "broke4" << std::endl;
+
     eng->popFrame();
 
     delete sub;
     delete simpl;
 
     return ret; 
+}
+
+Function* Invocation::getVar() {
+    for (int i = 0; i < arguments.size(); i++) {
+        if (Function* var = arguments[i]->getVar()) {
+            return var;
+        }
+    }
+
+    return nullptr;
 }
 
 std::string Invocation::toString() const {
@@ -56,36 +72,21 @@ std::string Invocation::toString() const {
 }
 
 bool Invocation::equals(repl::ExecutionEngine* eng, Expression* expr) {
-    if (!expr) {
-        return false;
-    }
-
-    Expression* simpl = simplify(eng);
-    Expression* other = expr->simplify(eng);
-
-    bool equality = false;
-    if (Invocation* leftInvoc = dynamic_cast<Invocation*>(simpl)) {
-        if (Invocation* rightInvoc = dynamic_cast<Invocation*>(other)) {
-            equality = leftInvoc->getExpression()->equals(eng, rightInvoc->getExpression());
-
-            std::vector<Expression*>& leftArgs = leftInvoc->getArguments();
-            std::vector<Expression*>& rightArgs = rightInvoc->getArguments();
-
-            equality &= leftArgs.size() == rightArgs.size();
-            for (int i = 0; i < leftArgs.size() && equality; i++) {
-                equality &= leftArgs[i]->equals(eng, rightArgs[i]);
-            }
-        }
-    } else {
-        equality = simpl->equals(eng, other);
-    }
-
-    delete simpl;
-    delete other;
-
-    return equality;
+    return false;
 }
 
 Expression* Invocation::clone() {
-    return new Invocation(expr, arguments);
+    std::vector<Expression*> args;
+    for (int i = 0; i < arguments.size(); i++) {
+        args.push_back(arguments[i]->clone());
+    }
+
+    return new Invocation(expr->clone(), args);
+}
+
+Invocation::~Invocation() {
+    delete expr;
+    for (int i = 0; i < arguments.size(); i++) {
+        delete arguments[i];
+    }
 }

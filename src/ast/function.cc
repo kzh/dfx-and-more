@@ -10,6 +10,8 @@ std::string Function::getName() const {
 }
 
 Expression* Function::derivative(repl::ExecutionEngine* eng, Function* respect) {
+
+
     return clone();
 }
 
@@ -30,11 +32,19 @@ Expression* Function::simplify(repl::ExecutionEngine* eng) {
     return clone();
 }
 
+Function* Function::getVar() {
+    return this;
+}
+
 std::string Function::toString() const {
     return name;
 }
 
 bool Function::equals(repl::ExecutionEngine* eng, Expression* expr) {
+    if (Function* other = dynamic_cast<Function*>(expr)) {
+        return name == other->getName();
+    }
+
     return false;
 }
 

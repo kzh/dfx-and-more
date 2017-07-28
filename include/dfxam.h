@@ -21,6 +21,7 @@ class Expression {
         virtual Expression* derivative(repl::ExecutionEngine* eng, Function* respect) = 0;
         virtual Expression* substitute(repl::ExecutionEngine* eng) = 0;
         virtual Expression* simplify(repl::ExecutionEngine* eng) = 0;
+        virtual Function* getVar() = 0;
         virtual std::string toString() const = 0;
 
         virtual bool equals(repl::ExecutionEngine* eng, Expression* expr) = 0;
@@ -39,6 +40,7 @@ class Constant: public Expression {
         Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
         Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
+        Function* getVar() override;
         std::string toString() const override;
 
         bool equals(repl::ExecutionEngine* eng, Expression* expr) override;
@@ -68,6 +70,7 @@ class Function : public Expression {
         Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
         Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
+        Function* getVar() override;
         std::string toString() const override;
 
         bool equals(repl::ExecutionEngine* eng, Expression* expr) override;
@@ -87,10 +90,13 @@ class Invocation : public Expression {
         Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
         Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
+        Function* getVar() override;
         std::string toString() const override;
 
         bool equals(repl::ExecutionEngine* eng, Expression* expr) override;
         Expression* clone() override;
+
+        ~Invocation() override;
 
     private:
         Expression* expr;
@@ -107,6 +113,7 @@ class Differentiation : public Expression {
         Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
         Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
+        Function* getVar() override;
         std::string toString() const override;
 
         bool equals(repl::ExecutionEngine* eng, Expression* expr) override;
@@ -126,6 +133,8 @@ class BinaryOperator : public Expression {
 
         void setLeft(Expression* l);
         void setRight(Expression* r);
+
+        Function* getVar() override;
 
         Expression* getLeft() const;
         Expression* getRight() const;
@@ -227,6 +236,7 @@ class Assignment : public Expression {
         Expression* derivative(repl::ExecutionEngine* eng, Function* respect) override;
         Expression* substitute(repl::ExecutionEngine* eng) override;
         Expression* simplify(repl::ExecutionEngine* eng) override;
+        Function* getVar() override;
         std::string toString() const override;
 
         bool equals(repl::ExecutionEngine* eng, Expression* expr) override;
@@ -338,6 +348,7 @@ class Frame {
         Frame(std::vector<ast::Expression*> args);
 
         bool bindParameters(std::vector<std::string> params);
+        std::vector<std::string> getParams();
         ast::Expression* getArg(std::string name);
 
     private:
@@ -351,6 +362,7 @@ class ExecutionEngine {
         Function* retrieveFunction(std::string name);
         void deregisterFunction(std::string name);
 
+        std::vector<std::string> getFrameParams();
         ast::Expression* getFrameArg(std::string name);
         bool bindFrameParameters(std::vector<std::string> params);
         void pushFrame(std::vector<ast::Expression*> args);

@@ -25,6 +25,10 @@ Expression* Assignment::simplify(repl::ExecutionEngine* eng) {
     return nullptr;
 }
 
+Function* Assignment::getVar() {
+    return nullptr;
+}
+
 std::string Assignment::toString() const {
     return "";
 }

@@ -25,6 +25,10 @@ Expression* Constant::simplify(repl::ExecutionEngine* eng) {
     return clone();
 }
 
+Function* Constant::getVar() {
+    return nullptr;
+}
+
 std::string Constant::toString() const {
     std::stringstream s;
     s << value;
