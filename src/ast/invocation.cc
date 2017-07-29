@@ -14,7 +14,12 @@ std::vector<Expression*>& Invocation::getArguments() {
 }
 
 Expression* Invocation::derivative(repl::ExecutionEngine* eng, Function* respect) {
-    return new Invocation(expr->derivative(eng, respect), arguments);
+    std::vector<Expression*> args;
+    for (int i = 0; i < arguments.size(); i++) {
+        args.push_back(arguments[i]->clone());
+    }
+
+    return new Invocation(expr->derivative(eng, respect), args);
 }
 
 Expression* Invocation::substitute(repl::ExecutionEngine* eng) {

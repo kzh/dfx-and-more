@@ -45,7 +45,12 @@ Expression* Differentiation::simplify(repl::ExecutionEngine* eng) {
         respect = expr->getVar(eng);
     }
 
-    return expr->derivative(eng, respect);
+    Expression* derivative = expr->derivative(eng, respect);
+    Expression* simpl = derivative->simplify(eng);
+
+    delete derivative;
+
+    return simpl;
 }
 
 Function* Differentiation::getVar(repl::ExecutionEngine* eng) {
@@ -91,5 +96,8 @@ bool Differentiation::equals(repl::ExecutionEngine* eng, Expression* expr) {
 
 Differentiation::~Differentiation() {
     delete expr;
-    delete respect;
+
+    if (respect) {
+        delete respect;
+    }
 }
