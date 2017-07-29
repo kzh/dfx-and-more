@@ -25,7 +25,7 @@ Expression* Assignment::simplify(repl::ExecutionEngine* eng) {
     return nullptr;
 }
 
-Function* Assignment::getVar() {
+Function* Assignment::getVar(repl::ExecutionEngine* eng) {
     return nullptr;
 }
 

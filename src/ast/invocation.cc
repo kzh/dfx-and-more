@@ -29,13 +29,9 @@ Expression* Invocation::substitute(repl::ExecutionEngine* eng) {
 Expression* Invocation::simplify(repl::ExecutionEngine* eng) {
     eng->pushFrame(arguments);
 
-    std::cout << "broke1" << std::endl;
     Expression* simpl = expr->simplify(eng);
-    std::cout << "broke2" << std::endl;
     Expression* sub = simpl->substitute(eng);
-    std::cout << "broke3" << std::endl;
     Expression* ret = sub->simplify(eng);
-    std::cout << "broke4" << std::endl;
 
     eng->popFrame();
 
@@ -45,9 +41,9 @@ Expression* Invocation::simplify(repl::ExecutionEngine* eng) {
     return ret; 
 }
 
-Function* Invocation::getVar() {
+Function* Invocation::getVar(repl::ExecutionEngine* eng) {
     for (int i = 0; i < arguments.size(); i++) {
-        if (Function* var = arguments[i]->getVar()) {
+        if (Function* var = arguments[i]->getVar(eng)) {
             return var;
         }
     }
@@ -58,9 +54,9 @@ Function* Invocation::getVar() {
 std::string Invocation::toString() const {
     std::stringstream s;
 
-    s << "(" << expr->toString() << ")(";
+    s << "(" << expr << ")(";
     for (int i = 0; i < arguments.size(); i++) {
-        s << arguments[i]->toString();
+        s << arguments[i];
 
         if (i != arguments.size() - 1) {
             s << ",";

@@ -25,7 +25,7 @@ Expression* Constant::simplify(repl::ExecutionEngine* eng) {
     return clone();
 }
 
-Function* Constant::getVar() {
+Function* Constant::getVar(repl::ExecutionEngine* eng) {
     return nullptr;
 }
 

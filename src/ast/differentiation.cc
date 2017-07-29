@@ -3,7 +3,7 @@
 using namespace dfxam::ast;
 
 Differentiation::Differentiation(Expression* expr)
-    : expr(expr) {}
+    : expr(expr), respect(nullptr) {}
 
 Differentiation::Differentiation(Expression* expr, Function* respect)
     : expr(expr), respect(respect) {}
@@ -41,16 +41,28 @@ Expression* Differentiation::substitute(repl::ExecutionEngine* eng) {
 }
 
 Expression* Differentiation::simplify(repl::ExecutionEngine* eng) {
+    if (!respect) {
+        respect = expr->getVar(eng);
+    }
+
     return expr->derivative(eng, respect);
 }
 
-Function* Differentiation::getVar() {
-    return respect;
+Function* Differentiation::getVar(repl::ExecutionEngine* eng) {
+    if (respect) {
+        return respect;
+    }
+
+    return expr->getVar(eng);
 }
 
 std::string Differentiation::toString() const {
     std::stringstream s;
-    s << "d/d" << respect->toString() << "(" << expr->toString() << ")";
+    if (respect) {
+        s << "d/d" << respect << "(" << expr << ")";
+    } else {
+        s << "(" << expr << ")'";
+    }
 
     return s.str();
 }
