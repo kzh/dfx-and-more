@@ -17,7 +17,14 @@ Function* Differentiation::getRespect() const {
 }
 
 Expression* Differentiation::derivative(repl::ExecutionEngine* eng, Function* respect) {
-    return simplify(eng);
+    Expression* simpl = simplify(eng);
+    Expression* derivative = simpl->derivative(eng, respect);
+    Expression* res = derivative->simplify(eng);
+
+    delete simpl;
+    delete derivative;
+
+    return res;
 }
 
 Expression* Differentiation::substitute(repl::ExecutionEngine* eng) {
@@ -45,12 +52,14 @@ Expression* Differentiation::simplify(repl::ExecutionEngine* eng) {
         respect = expr->getVar(eng);
     }
 
-    Expression* derivative = expr->derivative(eng, respect);
-    Expression* simpl = derivative->simplify(eng);
+    Expression* simpl = expr->simplify(eng);
+    Expression* derivative = simpl->derivative(eng, respect);
+    Expression* res = derivative->simplify(eng);
 
+    delete simpl;
     delete derivative;
 
-    return simpl;
+    return res;
 }
 
 Function* Differentiation::getVar(repl::ExecutionEngine* eng) {
@@ -73,8 +82,8 @@ std::string Differentiation::toString() const {
 }
 
 Expression* Differentiation::clone() {
-    return new Differentiation(expr->clone(), 
-                               new Function(respect->getName()));
+    Function* resp = respect ? new Function(respect->getName()) : nullptr;
+    return new Differentiation(expr->clone(), resp);
 }
 
 bool Differentiation::equals(repl::ExecutionEngine* eng, Expression* expr) {
