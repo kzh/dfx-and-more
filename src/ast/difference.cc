@@ -19,10 +19,32 @@ Expression* Difference::simplify(repl::ExecutionEngine* eng) {
     auto left = getLeft()->simplify(eng);
     auto right = getRight()->simplify(eng);
 
+    if (left->isConstant() && right->isConstant()) {
+        double lVal = static_cast<Constant*>(left)->getValue();
+        double rVal = static_cast<Constant*>(right)->getValue();
+
+        delete left;
+        delete right;
+
+        return new Constant(lVal - rVal);
+    } 
+
+    if (left->equals(eng, right)) {
+        delete left;
+        delete right;
+
+        return new Constant(0);
+    }
+
     // 0 - x = -1 * x
     if (Constant::isConstantValue(left, 0)) {
         delete left;
-        return new Product(new Constant(-1), right);
+
+        Product* neg = new Product(new Constant(-1), right);
+        Expression* simpl = neg->simplify(eng);
+        delete neg;
+
+        return simpl;
     }
 
     // x - 0 = x

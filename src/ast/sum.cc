@@ -20,16 +20,71 @@ Expression* Sum::simplify(repl::ExecutionEngine* eng) {
     Expression* left = getLeft()->simplify(eng);
     Expression* right = getRight()->simplify(eng);
 
-    /* additive identity property */
+    if (left->isConstant() && right->isConstant()) {
+        double lVal = static_cast<Constant*>(left)->getValue();
+        double rVal = static_cast<Constant*>(right)->getValue();
 
+        delete left;
+        delete right;
+
+        return new Constant(lVal + rVal);
+    } 
+
+    /* additive identity property */
     if (Constant::isConstantValue(left, 0)) {
         delete left;
-        return right; 
+        return right;
     }
 
     if (Constant::isConstantValue(right, 0)) {
         delete right;
         return left;
+    }
+
+    Product* lProd;
+    Product* rProd;
+    if ((lProd = dynamic_cast<Product*>(left)) &&
+        (rProd = dynamic_cast<Product*>(right))) {
+        Expression* lSum;
+        Expression* rSum;
+        Expression* mult;
+
+        if (lProd->getRight()->equals(eng, rProd->getRight())) {
+            mult = lProd->getRight();
+            lSum = lProd->getLeft();
+            rSum = rProd->getLeft();
+        } else if (lProd->getLeft()->equals(eng, rProd->getLeft())) {
+            mult = lProd->getLeft();
+            lSum = lProd->getRight();
+            rSum = rProd->getRight();
+        } else if (lProd->getLeft()->equals(eng, rProd->getRight())) {
+            mult = lProd->getLeft();
+            lSum = lProd->getRight();
+            rSum = rProd->getLeft();
+        } else if (lProd->getRight()->equals(eng, rProd->getLeft())) {
+            mult = lProd->getRight();
+            lSum = lProd->getLeft();
+            rSum = rProd->getRight();
+        }
+
+        Sum* s = new Sum(lSum->clone(), rSum->clone());
+        Product* p = new Product(s, mult->clone());
+        Expression* simpl = p->simplify(eng);
+
+        delete left;
+        delete right;
+        delete p;
+
+        return simpl;
+    }
+
+    if (left->equals(eng, right)) {
+        delete right;
+
+        Product* product = new Product(new Constant(2), left);
+        Expression* simpl = product->simplify(eng);
+
+        return simpl;
     }
 
     return new Sum(left, right);
@@ -48,19 +103,7 @@ bool Sum::equals(repl::ExecutionEngine* eng, Expression* expr) {
         return false;
     }
 
-    auto thisL = getLeft()->simplify(eng);
-    auto thisR = getRight()->simplify(eng);
-    auto exprL = s->getLeft()->simplify(eng);
-    auto exprR = s->getRight()->simplify(eng);
-
-    bool equality = thisL->equals(eng, exprL) && thisR->equals(eng, exprR);
-
-    delete thisL;
-    delete thisR;
-    delete exprL;
-    delete exprR;
-
-    return equality;
+    return getLeft()->equals(eng, s->getLeft()) && getRight()->equals(eng, s->getRight());
 }
 
 Expression* Sum::clone() {

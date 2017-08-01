@@ -26,6 +26,23 @@ Expression* Quotient::simplify(repl::ExecutionEngine* eng) {
     auto left = getLeft()->simplify(eng);
     auto right = getRight()->simplify(eng);
 
+    if (left->isConstant() && right->isConstant()) {
+        double lVal = static_cast<Constant*>(left)->getValue();
+        double rVal = static_cast<Constant*>(right)->getValue();
+
+        delete left;
+        delete right;
+
+        return new Constant(lVal / rVal);
+    } 
+
+    if (left->equals(eng, right)) {
+        delete left;
+        delete right;
+
+        return new Constant(1);
+    }
+
     if (Constant::isConstantValue(left, 0)) {
         delete left;
         delete right;
@@ -48,19 +65,7 @@ bool Quotient::equals(repl::ExecutionEngine* eng, Expression* expr) {
         return false;
     }
 
-    auto thisL = getLeft()->simplify(eng);
-    auto thisR = getRight()->simplify(eng);
-    auto exprL = q->getLeft()->simplify(eng);
-    auto exprR = q->getRight()->simplify(eng);
-
-    bool equality = thisL->equals(eng, exprL) && thisR->equals(eng, exprR);
-
-    delete thisL;
-    delete thisR;
-    delete exprL;
-    delete exprR;
-
-    return equality;
+    return getLeft()->equals(eng, q->getLeft()) && getRight()->equals(eng, q->getRight());
 }
 
 Expression* Quotient::clone() {

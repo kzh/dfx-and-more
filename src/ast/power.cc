@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "dfxam.h"
 
 using namespace dfxam::ast;
@@ -22,6 +24,49 @@ Expression* Power::simplify(repl::ExecutionEngine* eng) {
 //    std::cout << "Simplifying: " << this << std::endl;
     auto left = getLeft()->simplify(eng);
     auto right = getRight()->simplify(eng);
+
+    if (left->isConstant() && right->isConstant()) {
+        double lVal = static_cast<Constant*>(left)->getValue();
+        double rVal = static_cast<Constant*>(right)->getValue();
+
+        delete left;
+        delete right;
+
+        return new Constant(pow(lVal, rVal));
+    } 
+
+    // 1 ^ x = 1
+    if (Constant::isConstantValue(left, 1)) {
+        delete right;
+
+        return left;
+    }
+
+    // x ^ 0 = 1
+    if (Constant::isConstantValue(right, 0)) {
+        delete left;
+        delete right;
+
+        return new Constant(1);
+    }
+
+    // x ^ 1 = x
+    if (Constant::isConstantValue(right, 1)) {
+        delete right;
+
+        return left;
+    }
+
+    if (Power* p = dynamic_cast<Power*>(left)) {
+        Product* pow = new Product(p->getRight()->clone(), right);
+        Power* ret = new Power(p->getLeft()->clone(), pow);
+        Expression* simpl = ret->simplify(eng);
+
+        delete left;
+        delete ret;
+
+        return simpl;
+    }
 
     // a ^ log_a(x) = x
     if (Log* l = dynamic_cast<Log*>(right)) {

@@ -23,6 +23,16 @@ Expression* Product::simplify(repl::ExecutionEngine* eng) {
     Expression* left = getLeft()->simplify(eng);
     Expression* right = getRight()->simplify(eng);
 
+    if (left->isConstant() && right->isConstant()) {
+        double lVal = static_cast<Constant*>(left)->getValue();
+        double rVal = static_cast<Constant*>(right)->getValue();
+
+        delete left;
+        delete right;
+
+        return new Constant(lVal * rVal);
+    } 
+
     // multiplicative property of zero
     if (Constant::isConstantValue(left, 0) ||
         Constant::isConstantValue(right, 0)) {
@@ -38,6 +48,23 @@ Expression* Product::simplify(repl::ExecutionEngine* eng) {
     } else if (Constant::isConstantValue(right, 1)) {
         delete right;
         return left;
+    }
+
+    Power* lPow;
+    Power* rPow;
+    if ((lPow = dynamic_cast<Power*>(left)) &&
+        (rPow = dynamic_cast<Power*>(right)) &&
+        lPow->getRight()->equals(eng, rPow->getRight())) {
+
+        Product* s = new Product(lPow->getLeft()->clone(), rPow->getLeft()->clone());
+        Power* p = new Power(s, lPow->getRight()->clone());
+        Expression* simpl = p->simplify(eng);
+
+        delete left;
+        delete right;
+        delete p;
+    
+        return simpl;
     }
 
     return new Product(left, right);;
