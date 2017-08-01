@@ -45,9 +45,9 @@ Expression* Sum::simplify(repl::ExecutionEngine* eng) {
     Product* rProd;
     if ((lProd = dynamic_cast<Product*>(left)) &&
         (rProd = dynamic_cast<Product*>(right))) {
-        Expression* lSum;
-        Expression* rSum;
-        Expression* mult;
+        Expression* lSum = nullptr;
+        Expression* rSum = nullptr;
+        Expression* mult = nullptr;
 
         if (lProd->getRight()->equals(eng, rProd->getRight())) {
             mult = lProd->getRight();
@@ -67,15 +67,23 @@ Expression* Sum::simplify(repl::ExecutionEngine* eng) {
             rSum = rProd->getRight();
         }
 
-        Sum* s = new Sum(lSum->clone(), rSum->clone());
-        Product* p = new Product(s, mult->clone());
-        Expression* simpl = p->simplify(eng);
+        if (lSum && rSum && mult) {
+            std::cout << "SAH1" << std::endl;
+            std::cout << lSum << std::endl;
+            std::cout << "SAH2" << std::endl;
+            std::cout << rSum << std::endl;
+            std::cout << "SAH3" << std::endl;
 
-        delete left;
-        delete right;
-        delete p;
+            Sum* s = new Sum(lSum->clone(), rSum->clone());
+            Product* p = new Product(s, mult->clone());
+            Expression* simpl = p->simplify(eng);
 
-        return simpl;
+            delete left;
+            delete right;
+            delete p;
+
+            return simpl;
+        }
     }
 
     if (left->equals(eng, right)) {
