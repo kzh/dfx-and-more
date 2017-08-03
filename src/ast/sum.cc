@@ -68,12 +68,6 @@ Expression* Sum::simplify(repl::ExecutionEngine* eng) {
         }
 
         if (lSum && rSum && mult) {
-            std::cout << "SAH1" << std::endl;
-            std::cout << lSum << std::endl;
-            std::cout << "SAH2" << std::endl;
-            std::cout << rSum << std::endl;
-            std::cout << "SAH3" << std::endl;
-
             Sum* s = new Sum(lSum->clone(), rSum->clone());
             Product* p = new Product(s, mult->clone());
             Expression* simpl = p->simplify(eng);

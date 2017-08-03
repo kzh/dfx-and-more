@@ -11,8 +11,11 @@ Power::Power(Expression* left, Expression* right)
 Expression* Power::derivative(repl::ExecutionEngine* eng, Function* respect) {
     auto left = new Power(new E(), new Log(new E(), clone()));
     auto right = new Product(getRight()->clone(), new Log(new E(), getLeft()->clone()));
+    Product* p = new Product(right->derivative(eng, respect), left);
 
-    return new Product(right->derivative(eng, respect), left->clone());
+    delete right;
+
+    return p; 
 }
 
 Expression* Power::substitute(repl::ExecutionEngine* eng) {
